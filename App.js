@@ -12,11 +12,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {CommonActions} from '@react-navigation/native';
 import { enableExpoCliLogging } from 'expo/build/logs/Logs';
 import uuid from 'react-native-uuid';
-import { ScrollView, KeyboardAvoidingView, Button, Image } from 'react-native';
-import * as Permissions from 'expo-permissions';
+import { ScrollView, KeyboardAvoidingView, Image } from 'react-native';
+// import * as Permissions from 'expo-permissions';
 import * as ImagePicker from 'expo-image-picker';
+import * as MediaLibrary from 'expo-media-library';
 
 export const FormDataContext = React.createContext();
+
+// import HomeScreen from './HomeScreen'; // Adjust the path as necessary
 
 // Define your HomeScreen component
 function HomeScreen() {
@@ -57,19 +60,27 @@ function FormScreen() {
   const id = uuid.v4();
 
   const [image, setImage] = useState(null);
+  // const [image, setImage] = useState(null);
 
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4,3],
-      quality: 1,
-    });
 
-    console.log(result);
+  async function pickImage() {
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Sorry, we need media library permissions to make this work!');
+    } else {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4,3],
+        quality: 1,
+        //multiple: true,
+      });
+      console.log(result);
 
-    if (!result.cancelled) {
-      setImage(result.uri);
+      if (!result.canceled) {
+        // setImage(result.assets[0].uri);
+        setImage(result.uri);
+      }
     }
   }
 
@@ -81,20 +92,41 @@ function FormScreen() {
       companyEmail: '',
       companyWebsite: '',
       DescriptionOfService: '',
+      imageUri: '',
     },
     onSubmit: async values => {
-      console.log(values);
+      console.log('FormScreen - values before setting imageUri: ', values);
+      console.log('FormScreen - image: ', image);
       // Here you could dispatch the values to your Redux store, post them to a server, etc.
 
-      console.log('FormScreen - formData: ', formData);
-      console.log('FormScreen - values', values);
+      // console.log('FormScreen - formData: ', formData);
+      // console.log('FormScreen - values', values);
 
       // setFormData([...formData, values]);
-      setFormData(prevFormData => [...prevFormData, values]);
-      console.log('FormScreen - [...formData, values]', [...formData, values]);
+      values.imageUri = image;
+      console.log('FormScreen - values after setting imageUri: ', values);
 
-      console.log("Submit Button Pressed");
-      console.log(navigation);
+      setFormData(prevFormData => [...prevFormData, values]);
+      // console.log('FormScreen - [...formData, values]', [...formData, values]);
+
+      fetch('http://192.168.0.14:5000/forms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data.message);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+
+
+      // console.log("Submit Button Pressed");
+      // console.log(navigation);
       await storeData(values);
       navigation.navigate('DisplayScreen');
     },
@@ -151,11 +183,24 @@ function FormScreen() {
           style={{marginBottom: 20, height: 40, borderColor: 'gray', borderWidth: 1, color: 'black', backgroundColor: '#fff', paddingLeft: 10, marginTop: 1, marginLeft: 20, marginRight: 20}}
         />
 
-        <Button title="Pick an image from camera roll" onPress={pickImage} />
+        <View style={{marginBottom: 20, alignItems: 'center', justifyContent: 'center'}}>
+          <Button title="Pick an image from camera roll" onPress={pickImage} />
+          <View style={{ width: 200, height: 200, borderColor: 'gray', borderWidth: 1, marginTop: 20, alignItems: 'center', justifyContent: 'center' }}>
+            {image ? <Image source={{uri: image}} style={{width: '100%', height: '100%'}} /> : <Text>Select an Image</Text>}
+            {/* {image && image.map((uri, index) => ( */}
+              {/* <Image source={{ uri: image }} style={{ width: '100%', height: '100%' }} /> */}
+            {/* ))} */}
+          </View>
+        </View>
         
-        <image && <Image source={{uri: image}} style={{width: 200, height: 200}} />
         
-        <Button title="Submit" onPress={formik.handleSubmit} style={{borderWidth: 1, marginTop: 20}}>Submit</Button>
+
+        {/* {image && <Image source={{uri: image}} style={{width: 200, height: 200}} />} */}
+        
+        <View style={{borderWidth: 1}}>
+          <Button title="Submit" onPress={formik.handleSubmit}>Submit</Button>
+        </View>
+        
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -264,11 +309,19 @@ function DisplayScreen() {
         {/* Display the form data here */}
         {formData && formData.map((form) => (
           <View key={form.id} style={styles.displayContainer}>
-            <Text style={{color: 'black'}} >Company Name: {form.companyName}</Text>
-            <Text style={{color: 'black'}} >Company Number: {form.companyNumber}</Text>
-            <Text style={{color: 'black'}} >Company Email: {form.companyEmail}</Text>
-            <Text style={{color: 'black'}} >Company Website: {form.companyWebsite}</Text>
-            <Text style={{color: 'black'}} >Desciption of Service: {form.DescriptionOfService}</Text>
+            <View style={{ flex: 1}}>
+              <Text style={{color: 'black'}} >Company Name: {form.companyName}</Text>
+              <Text style={{color: 'black'}} >Company Number: {form.companyNumber}</Text>
+              <Text style={{color: 'black'}} >Company Email: {form.companyEmail}</Text>
+              <Text style={{color: 'black'}} >Company Website: {form.companyWebsite}</Text>
+              <Text style={{color: 'black'}} >Desciption of Service: {form.DescriptionOfService}</Text>
+            </View>
+            {form.imageUri && (
+              <Image
+                source={{ uri: form.imageUri }}
+                style={{ width: 100, height: 100 }}
+              />
+            )}
           </View>        
         ))}
       </View>
@@ -379,6 +432,7 @@ const styles = StyleSheet.create({
     borderWidth: 2, // Border width
     borderColor: '#000', // Border color
     // height: 200,
-    margin: 5
+    margin: 5,
+    flexDirection: 'row',
   }
 });
