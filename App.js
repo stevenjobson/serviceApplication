@@ -340,30 +340,82 @@ function ChatScreen() {
   );
 }
 
-
 // Define your SettingsScreen component
 function SettingsScreen() {
+  const navigation = useNavigation();
+
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#25292e' }}>
+    <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'center', backgroundColor: '#25292e' }}>
       {/* <Text style={{color: '#fff'}}>Settings Screen</Text> */}
-      
+      {/* <Button title="User Profile" onPress={() => navigation.navigate('UserProfile')}> </Button> */}
+      <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('UserProfile')}>
+        <Text style={styles.settingsButtonText}>User Profile</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('Login')}>
+        <Text style={styles.settingsButtonText}>Login</Text>
+      </TouchableOpacity>
+
     </View>
   );
 }
 
-// Create the Stack Navigator
-const Stack = createStackNavigator();
-
-function HomeStack() {
+function UserProfileScreen() {
   return (
-    <Stack.Navigator initialRouteName="Home">
-      <Stack.Screen name="HomeScreen" component={HomeScreen} /> 
-      <Stack.Screen name="Form" component={FormScreen} />
-      <Stack.Screen name="DisplayScreen" component={DisplayScreen} />
-    </Stack.Navigator>
-  );
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Text>User Profile Screen</Text>
+    </View>
+  )
 }
 
+//sign up screen
+function SignUpScreen() {
+  return (
+    <View style={{flex:1, justifyContent: 'flex-start', alignItems: 'center', backgroundColor: '#25292e'}}>
+      <TouchableOpacity style={styles.settingsButton} >
+        <Text style={styles.settingsButtonText}>Name</Text>
+      </TouchableOpacity>
+    </View>
+  )
+}
+
+//login screen
+function LoginScreen() {
+  // return (
+  //   <View style={{flex:1, justifyContent: 'flex-start', alignItems: 'center', backgroundColor: '#25292e'}}>
+  //     <TouchableOpacity style={styles.settingsButton} >
+  //       <Text style={styles.settingsButtonText}>User Name</Text>
+  //     </TouchableOpacity>
+  //   </View>
+  // )
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  return (
+    <View style={styles.container3}>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Username</Text>
+        <TextInput
+          style={styles.input}
+          onChangeText={setUsername}
+          value={username}
+          placeholder="Enter your username"
+        />
+      </View>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          onChangeText={setPassword}
+          value={password}
+          placeholder="Enter your password"
+          secureTextEntry
+        />
+      </View>
+    </View>
+    
+  )
+}
 
 const Tab = createBottomTabNavigator();
 
@@ -372,12 +424,38 @@ function MyTabs() {
         <Tab.Navigator >
           <Tab.Screen  name="Home" component={HomeStack} options={{ headerShown: false}}/>
           <Tab.Screen name="Chat" component={ChatScreen} />
-          <Tab.Screen name="Settings" component={SettingsScreen} />
+          <Tab.Screen name="Settings'" component={SettingsStackScreen} options={{ headerShown: false}}/>
         </Tab.Navigator>
     );
 }
 
+const HomeStackNavigator = createStackNavigator();
 
+function HomeStack() {
+  return (
+    <HomeStackNavigator.Navigator initialRouteName="Home">
+      <HomeStackNavigator.Screen name="HomeScreen" component={HomeScreen} /> 
+      <HomeStackNavigator.Screen name="Form" component={FormScreen} />
+      <HomeStackNavigator.Screen name="DisplayScreen" component={DisplayScreen} />
+      {/* <Stack.Screen name="UserProfile" component={UserProfileScreen} />
+      <Stack.Screen name="SignUp" component={SignUpScreen} /> */}
+    </HomeStackNavigator.Navigator>
+  );
+}
+
+// Create a new stack for Settings and UserProfile
+const SettingsStack = createStackNavigator();
+
+function SettingsStackScreen() {
+  return (
+    <SettingsStack.Navigator>
+      <SettingsStack.Screen name="Settings" component={SettingsScreen} />
+      <SettingsStack.Screen name="UserProfile" component={UserProfileScreen} />
+      <SettingsStack.Screen name="Login" component={LoginScreen} />
+      <SettingsStack.Screen name="SignUp" component={SignUpScreen} />
+    </SettingsStack.Navigator>
+  );
+}
 
 export default function App() {
 
@@ -434,5 +512,51 @@ const styles = StyleSheet.create({
     // height: 200,
     margin: 5,
     flexDirection: 'row',
-  }
+  },
+  settingsButton: {
+    width: '100%', // Take up the full width
+    padding: 15, // Padding for the text inside
+    alignItems: 'flex-start', // Center the text horizontally
+    justifyContent: 'center', // Center the text vertically
+    borderBottomWidth: 2, // Add a border at the bottom
+    borderBottomColor: '#808080', // Make the border grey
+    justifyContent: 'flex-start',
+  },  
+  settingsButtonText: {
+    color: '#FFFFFF', // White text
+    fontSize: 18, // Larger font size
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    marginTop: 10,
+  },
+  input: {
+    height: 40,
+    width: '70%',
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+    backgroundColor: '#fff',
+    borderRadius: 5,
+  },  
+  inputContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    width: '80%',
+    marginBottom: 10,
+  },
+  label: {
+    color: '#FFFFFF',
+    fontSize: 18,
+  },
+  container3: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    backgroundColor: '#25292e',
+    paddingTop: 20,
+  },
+  // container4: {
+  //   justifyContent: 'flex-start',
+  // }
 });
