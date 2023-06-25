@@ -417,8 +417,8 @@ function SignUpScreen() {
     }
 
     // Check that the password is at least 6 characters long
-    if (password.length < 6 && password.includes("")) {
-      Alert.alert('Password must be at least 6 characters long');
+    if (password.length < 6 && password.includes(" ")) {
+      Alert.alert('Password must be at least 6 characters long and should not contain a space');
       return;
     }
 
@@ -428,6 +428,18 @@ function SignUpScreen() {
     if (!passwordRegex.test(password)) {
       Alert.alert('Password must contain at least one number, one uppercase letter, one lowercase letter, and one special character');
       return;
+    }
+
+    // Check if the email is valid
+    const emailRegex = /^\S+@\S+\.\S+$/;
+
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Invalid email format' });
+    }
+
+    const existingEmail = users.find(user=> user.email === email);
+    if (existingEmail) {
+      return res.status(400).json({ message: 'Email already taken.' });
     }
 
     // Check that the password and confirmation match
@@ -546,9 +558,14 @@ function LoginScreen({ onLogin }) {
     })
     .then(response => response.json())
     .then(data => {
-      // Handle the response here
+      //handle the response here
       console.log(data);
+      if (data.message === 'User logged in successfully.') {
       onLogin();
+    } else {
+      // Handle login failure
+      alert('Invalid username or password');
+    }
     })
     .catch((error) => {
       console.error('Error:', error);

@@ -52,14 +52,18 @@ app.post('/forms', function(req, res) {
   res.status(201).json({ message: 'Form data submitted successfully.' });
 });
 
+let users = [];
+
+// Hardcoded username and password for testing
+const testUsername = 'testUser';
+const testPasswordHash = bcrypt.hashSync('testPassword', 10);
+users.push({testUsername, testPasswordHash});
+
 // User login
 app.post('/login', function(req, res) {
   const { username, password } = req.body;
 
-  // Hardcoded username and password for testing
-  const testUsername = 'testUser';
-  const testPasswordHash = bcrypt.hashSync('testPassword', 10);
-
+  //this code need to change such that username and password are simply searching the array for a matching username and password.
   if (username !== testUsername || !bcrypt.compareSync(password, testPasswordHash)) {
     // Invalid username or password
     return res.status(401).json({ message: 'Invalid username or password' });
@@ -73,8 +77,27 @@ app.post('/login', function(req, res) {
 app.post('/register', async (req, res) => {
   const { username, password, confirmPassword, email} = req.body;
 
-  let users = [];
   // Validate the user data...
+  
+  if (username.length < 6) {
+    return res.status(400).json({ message: 'Username must be at least 6 characters long' });
+  }
+
+  if (password.length < 6 && password.includes(" ")) {
+    return res.status(400).json({ message: 'Password must be at least 6 characters long and should not include a space'});
+  }
+
+  // At least one number, one uppercase letter, one lowercase letter and one special character
+  const passwordRegex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{6,}$/;
+
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({ message: 'Password must contain at least one number, one uppercase letter, one lowercase letter, and one special character' });
+  }
+
+  // Check that the password and confirmation match
+  if (password !== confirmPassword) {
+    return res.status(400).json({ message: 'Passwords do not match' });
+  }
 
   // Hash the password before storing it
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -83,6 +106,18 @@ app.post('/register', async (req, res) => {
   const existingUser = users.find(user => user.username === username);
   if (existingUser) {
     return res.status(400).json({ message: 'Username already taken.' });
+  }
+
+  // Check if the email is valid
+  const emailRegex = /^\S+@\S+\.\S+$/;
+
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ message: 'Invalid email format' });
+  }
+
+  const existingEmail = users.find(user=> user.email === email);
+  if (existingEmail) {
+    return res.status(400).json({ message: 'Email already taken.' });
   }
 
   // Store the user data (you'll want to replace this with code to store the user in your database)
