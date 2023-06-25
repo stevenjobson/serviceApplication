@@ -12,10 +12,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {CommonActions} from '@react-navigation/native';
 import { enableExpoCliLogging } from 'expo/build/logs/Logs';
 import uuid from 'react-native-uuid';
-import { ScrollView, KeyboardAvoidingView, Image } from 'react-native';
+import { ScrollView, KeyboardAvoidingView, Image, Alert } from 'react-native';
 // import * as Permissions from 'expo-permissions';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
+
 
 export const FormDataContext = React.createContext();
 
@@ -256,9 +257,13 @@ async function clearSpecificKey() {
 
 
 function DisplayScreen() {
+
+  console.log("DISPLAY SCREEN!!");
   //const [formData, setFormData] = useState([]);
   const { formData } = React.useContext(FormDataContext);
   const navigation = useNavigation();
+
+  
 
   useEffect(() => {
     async function fetchData() {
@@ -340,8 +345,30 @@ function ChatScreen() {
   );
 }
 
+//pre-login
 // Define your SettingsScreen component
-function SettingsScreen() {
+function SettingsScreen1( {onLogin} ) {
+  const navigation = useNavigation();
+
+  return (
+    <View style={{ flex: 1, justifyContent: 'flex-start', alignItems: 'center', backgroundColor: '#25292e' }}>
+
+      <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('Login', { onLogin })}>
+        <Text style={styles.settingsButtonText}>Login</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('SignUp')}>
+        <Text style={styles.settingsButtonText}>Signup</Text>
+      </TouchableOpacity>
+
+    </View>
+  );
+}
+
+
+//Post login
+// Define your SettingsScreen component 
+function SettingsScreen2() {
   const navigation = useNavigation();
 
   return (
@@ -352,9 +379,13 @@ function SettingsScreen() {
         <Text style={styles.settingsButtonText}>User Profile</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('Login')}>
+      {/* <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('Login')}>
         <Text style={styles.settingsButtonText}>Login</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('SignUp')}>
+        <Text style={styles.settingsButtonText}>Signup</Text>
+      </TouchableOpacity> */}
 
     </View>
   );
@@ -370,17 +401,127 @@ function UserProfileScreen() {
 
 //sign up screen
 function SignUpScreen() {
-  return (
-    <View style={{flex:1, justifyContent: 'flex-start', alignItems: 'center', backgroundColor: '#25292e'}}>
-      <TouchableOpacity style={styles.settingsButton} >
-        <Text style={styles.settingsButtonText}>Name</Text>
-      </TouchableOpacity>
-    </View>
-  )
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState('');
+  // const []
+
+
+
+  const handleRegister = () => {
+    // Check that the username is at least 3 characters long
+    if (username.length < 6) {
+      Alert.alert('Username must be at least 6 characters long');
+      return;
+    }
+
+    // Check that the password is at least 6 characters long
+    if (password.length < 6 && password.includes("")) {
+      Alert.alert('Password must be at least 6 characters long');
+      return;
+    }
+
+    // At least one number, one uppercase letter, one lowercase letter and one special character
+    const passwordRegex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{6,}$/;
+
+    if (!passwordRegex.test(password)) {
+      Alert.alert('Password must contain at least one number, one uppercase letter, one lowercase letter, and one special character');
+      return;
+    }
+
+    // Check that the password and confirmation match
+    if (password !== confirmPassword) {
+      Alert.alert('Passwords do not match');
+      return;
+    }
+
+    fetch('http://192.168.0.14:5000/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+        confirmPassword: confirmPassword,
+        email: email,
+      }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.message === 'User registered successfully.') {
+          Alert.alert('Registration successful');
+        } else {
+          Alert.alert('Registration failed');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+    };
+
+    return (
+      <View style={styles.container3}>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label2}>Username</Text>
+          <TextInput
+            style={styles.input2}
+            placeholder="Enter Username"
+            value={username}
+            onChangeText={setUsername}
+          />
+        </View>
+        
+        <View style={styles.inputContainer}>
+          <Text style={styles.label2}>Password</Text>
+          <TextInput
+            style={styles.input2}
+            placeholder="Enter Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+        </View>  
+        
+        <View style={styles.inputContainer}>
+          <Text style={styles.label2}>Confirm Password</Text>
+          <TextInput
+            style={styles.input2}
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+        />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label2}>Email</Text>
+          <TextInput
+            style={styles.input2}
+            placeholder="Enter Email"
+            value={email}
+            onChangeText={setEmail}
+            
+          />
+        </View>
+        
+        <View style={{marginTop: 10}}>
+          <Button title="Register" onPress={handleRegister} />
+        </View>
+        
+      </View>
+    );
+    
 }
 
 //login screen
-function LoginScreen() {
+function LoginScreen({ onLogin }) {
   // return (
   //   <View style={{flex:1, justifyContent: 'flex-start', alignItems: 'center', backgroundColor: '#25292e'}}>
   //     <TouchableOpacity style={styles.settingsButton} >
@@ -390,6 +531,29 @@ function LoginScreen() {
   // )
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  const handleLogin = () => {
+    // Call your login API here
+    fetch('http://192.168.0.14:5000/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+      }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Handle the response here
+      console.log(data);
+      onLogin();
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+  }
 
   return (
     <View style={styles.container3}>
@@ -412,65 +576,125 @@ function LoginScreen() {
           secureTextEntry
         />
       </View>
+      {/* <TouchableOpacity style={styles.settingsButton} onPress={handleLogin}>
+        <Text style={styles.settingsButtonText}>Login</Text>
+      </TouchableOpacity> */}
+      <View style={{marginTop: 10}}>
+        <Button title="Login" onPress={handleLogin} />
+      </View>
+      
     </View>
     
   )
 }
 
-const Tab = createBottomTabNavigator();
+const PreLogTab = createBottomTabNavigator();
 
-function MyTabs() {
+function PreLoggedInTabs( {onLogin} ) {
+  return (
+    <PreLogTab.Navigator>
+      <PreLogTab.Screen name="PrelogHome" component={HomeStack1} options={{ headerShown: false}} />
+      <PreLogTab.Screen name="PrelogSettings'" /*component={SettingsStackScreen1}*/ options={{ headerShown: false}} children={()=><SettingsStackScreen1 onLogin={onLogin} />}/>
+    </PreLogTab.Navigator>
+  );
+}
+
+//this handles the post logged in view of my app
+const PostLogTab = createBottomTabNavigator();
+
+function PostLoggedInTabs() {
     return (
-        <Tab.Navigator >
-          <Tab.Screen  name="Home" component={HomeStack} options={{ headerShown: false}}/>
-          <Tab.Screen name="Chat" component={ChatScreen} />
-          <Tab.Screen name="Settings'" component={SettingsStackScreen} options={{ headerShown: false}}/>
-        </Tab.Navigator>
+        <PostLogTab.Navigator >
+          <PostLogTab.Screen  name="Home" component={HomeStack2} options={{ headerShown: false}}/>
+          <PostLogTab.Screen name="Chat" component={ChatScreen} />
+          <PostLogTab.Screen name="Settings'" component={SettingsStackScreen2} options={{ headerShown: false}}/>
+        </PostLogTab.Navigator>
     );
 }
 
-const HomeStackNavigator = createStackNavigator();
+const HomeStackNavigator1 = createStackNavigator();
 
-function HomeStack() {
+function HomeStack1() {
   return (
-    <HomeStackNavigator.Navigator initialRouteName="Home">
-      <HomeStackNavigator.Screen name="HomeScreen" component={HomeScreen} /> 
-      <HomeStackNavigator.Screen name="Form" component={FormScreen} />
-      <HomeStackNavigator.Screen name="DisplayScreen" component={DisplayScreen} />
+    <HomeStackNavigator1.Navigator>
+      <HomeStackNavigator1.Screen name="DisplayScreen" component={DisplayScreen} />
+    </HomeStackNavigator1.Navigator>
+  )
+}
+
+const HomeStackNavigator2 = createStackNavigator();
+
+function HomeStack2() {
+  return (
+    <HomeStackNavigator2.Navigator initialRouteName="Home">
+      <HomeStackNavigator2.Screen name="HomeScreen" component={HomeScreen} /> 
+      <HomeStackNavigator2.Screen name="Form" component={FormScreen} />
+      <HomeStackNavigator2.Screen name="DisplayScreen" component={DisplayScreen} />
       {/* <Stack.Screen name="UserProfile" component={UserProfileScreen} />
       <Stack.Screen name="SignUp" component={SignUpScreen} /> */}
-    </HomeStackNavigator.Navigator>
+    </HomeStackNavigator2.Navigator>
+  );
+}
+
+const SettingsStack1 = createStackNavigator();
+
+function SettingsStackScreen1( {onLogin} ) {
+  return (
+    <SettingsStack1.Navigator>
+      <SettingsStack1.Screen name="Settings" component={SettingsScreen1} />
+      {/* <SettingsStack2.Screen name="UserProfile" component={UserProfileScreen} /> */}
+      <SettingsStack1.Screen name="Login" /*component={LoginScreen}*/ children={()=><LoginScreen onLogin={onLogin}/> } />
+      <SettingsStack1.Screen name="SignUp" component={SignUpScreen} />
+    </SettingsStack1.Navigator>
   );
 }
 
 // Create a new stack for Settings and UserProfile
-const SettingsStack = createStackNavigator();
+const SettingsStack2 = createStackNavigator();
 
-function SettingsStackScreen() {
+function SettingsStackScreen2() {
   return (
-    <SettingsStack.Navigator>
-      <SettingsStack.Screen name="Settings" component={SettingsScreen} />
-      <SettingsStack.Screen name="UserProfile" component={UserProfileScreen} />
-      <SettingsStack.Screen name="Login" component={LoginScreen} />
-      <SettingsStack.Screen name="SignUp" component={SignUpScreen} />
-    </SettingsStack.Navigator>
+    <SettingsStack2.Navigator>
+      <SettingsStack2.Screen name="Settings" component={SettingsScreen2} />
+      <SettingsStack2.Screen name="UserProfile" component={UserProfileScreen} />
+      {/* <SettingsStack.Screen name="Login" component={LoginScreen} />
+      <SettingsStack.Screen name="SignUp" component={SignUpScreen} /> */}
+    </SettingsStack2.Navigator>
   );
 }
 
 export default function App() {
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [formData, setFormData] = useState([]); 
 
   useEffect(() => {
     clearSpecificKey(); // or clearSpecificKey();
   }, []);
 
+  const handleLogin2 = () => {
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+  };
+
   return (
 
     <View style={styles.container}>
-      <FormDataContext.Provider value = {{formData, setFormData}}>
+      {/* <FormDataContext.Provider value = {{formData, setFormData}}>
         <NavigationContainer>
-          <MyTabs />
+          <PostLogTab />
+        </NavigationContainer>
+      </FormDataContext.Provider> */}
+      <FormDataContext.Provider value={{ formData, setFormData }}>
+        <NavigationContainer>
+          {isLoggedIn ? (
+            <PostLoggedInTabs onLogout={handleLogout} />
+          ) : (
+            <PreLoggedInTabs onLogin={handleLogin2}/>
+          )}
         </NavigationContainer>
       </FormDataContext.Provider>
     </View>
@@ -556,7 +780,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#25292e',
     paddingTop: 20,
   },
-  // container4: {
-  //   justifyContent: 'flex-start',
-  // }
+  // inputContainer2: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   marginBottom: 15,
+  // },
+  label2: {
+    color: '#FFFFFF',
+    width: 100,
+  },
+  input2: {
+    height: 40,
+    width: '70%',
+    justifyContent: 'flex-start',
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+    backgroundColor: '#fff',
+    borderRadius: 5,
+  },
+  
 });
