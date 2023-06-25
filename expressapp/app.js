@@ -63,9 +63,19 @@ users.push({testUsername, testPasswordHash});
 app.post('/login', function(req, res) {
   const { username, password } = req.body;
 
-  //this code need to change such that username and password are simply searching the array for a matching username and password.
-  if (username !== testUsername || !bcrypt.compareSync(password, testPasswordHash)) {
-    // Invalid username or password
+  // Check if the username exists in the users array
+  const foundUser = users.find(user => user.username === username);
+
+  if (!foundUser) {
+    // Username not found
+    return res.status(401).json({ message: 'Invalid username or password' });
+  }
+
+  // Check if the password is correct
+  const isPasswordCorrect = bcrypt.compareSync(password, foundUser.password);
+
+  if (!isPasswordCorrect) {
+    // Incorrect password
     return res.status(401).json({ message: 'Invalid username or password' });
   }
 

@@ -211,13 +211,13 @@ const storeData = async (value) => {
 try {
     // Get current array of forms
     const jsonValue = await AsyncStorage.getItem('@storage_Key');
-    console.log("storeData - jsonValue: ", jsonValue);
+    //console.log("storeData - jsonValue: ", jsonValue);
     let forms = jsonValue != null ? JSON.parse(jsonValue) : [];
 
-    console.log("storeData - forms (before appending data): ", forms);
-    console.log("storeData - value: ", value);
+    // console.log("storeData - forms (before appending data): ", forms);
+    // console.log("storeData - value: ", value);
 
-    console.log("Is forms an array? ", Array.isArray(forms)); // debugging line
+    // console.log("Is forms an array? ", Array.isArray(forms)); // debugging line
     forms.push(value);//"forms.push(value);"
     console.log("storeData - forms: ", forms);//what forms looks like
     // await AsyncStorage.setItem('@storage_Key', jsonValue)
@@ -407,6 +407,7 @@ function SignUpScreen() {
   const [email, setEmail] = useState('');
   // const []
 
+  const navigation = useNavigation();
 
 
   const handleRegister = () => {
@@ -469,6 +470,7 @@ function SignUpScreen() {
       .then(data => {
         if (data.message === 'User registered successfully.') {
           Alert.alert('Registration successful');
+          navigation.navigate('Login');
         } else {
           Alert.alert('Registration failed');
         }
@@ -611,7 +613,7 @@ function PreLoggedInTabs( {onLogin} ) {
   return (
     <PreLogTab.Navigator>
       <PreLogTab.Screen name="PrelogHome" component={HomeStack1} options={{ headerShown: false}} />
-      <PreLogTab.Screen name="PrelogSettings'" /*component={SettingsStackScreen1}*/ options={{ headerShown: false}} children={()=><SettingsStackScreen1 onLogin={onLogin} />}/>
+      <PreLogTab.Screen name="PrelogSettings'" options={{ headerShown: false}} children={()=><SettingsStackScreen1 onLogin={onLogin} />}/>
     </PreLogTab.Navigator>
   );
 }
