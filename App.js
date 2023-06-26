@@ -229,7 +229,7 @@ try {
 
   } catch (e) {
     // saving error
-    console.log("error in the storeData function: "+e);
+    console.log("error in the storeData function: " + e);
   }
 }
 
@@ -286,7 +286,7 @@ function DisplayScreen() {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-      // This prevents the default behavior of going back
+      // This prevents the default behavior of going back to formScreen from 
 
       if (e.data.action.type !== 'POP') {
         return;
@@ -368,7 +368,7 @@ function SettingsScreen1( {onLogin} ) {
 
 //Post login
 // Define your SettingsScreen component 
-function SettingsScreen2() {
+function SettingsScreen2( {onLogout} ) {
   const navigation = useNavigation();
 
   return (
@@ -379,13 +379,13 @@ function SettingsScreen2() {
         <Text style={styles.settingsButtonText}>User Profile</Text>
       </TouchableOpacity>
 
-      {/* <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.settingsButtonText}>Login</Text>
+      <TouchableOpacity style={styles.settingsButton} onPress={() => onLogout()}>
+        <Text style={styles.settingsButtonText}>Logout</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('SignUp')}>
+      {/* <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('SignUp')}>
         <Text style={styles.settingsButtonText}>Signup</Text>
-      </TouchableOpacity> */}
+      </TouchableOpacity>  */}
 
     </View>
   );
@@ -435,13 +435,14 @@ function SignUpScreen() {
     const emailRegex = /^\S+@\S+\.\S+$/;
 
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: 'Invalid email format' });
+      // return res.status(400).json({ message: 'Invalid email format' });
+      Alert.alert("Email is invalidly formatted.");
     }
 
-    const existingEmail = users.find(user=> user.email === email);
-    if (existingEmail) {
-      return res.status(400).json({ message: 'Email already taken.' });
-    }
+    // const existingEmail = users.find(user=> user.email === email);
+    // if (existingEmail) {
+    //   return res.status(400).json({ message: 'Email already taken.' });
+    // }
 
     // Check that the password and confirmation match
     if (password !== confirmPassword) {
@@ -621,12 +622,12 @@ function PreLoggedInTabs( {onLogin} ) {
 //this handles the post logged in view of my app
 const PostLogTab = createBottomTabNavigator();
 
-function PostLoggedInTabs() {
+function PostLoggedInTabs( {onLogout} ) {
     return (
         <PostLogTab.Navigator >
           <PostLogTab.Screen  name="Home" component={HomeStack2} options={{ headerShown: false}}/>
           <PostLogTab.Screen name="Chat" component={ChatScreen} />
-          <PostLogTab.Screen name="Settings'" component={SettingsStackScreen2} options={{ headerShown: false}}/>
+          <PostLogTab.Screen name="Settings'" /*component={SettingsStackScreen2}*/ options={{ headerShown: false}} children={()=><SettingsStackScreen2 onLogout={onLogout} />}/>
         </PostLogTab.Navigator>
     );
 }
@@ -671,11 +672,11 @@ function SettingsStackScreen1( {onLogin} ) {
 // Create a new stack for Settings and UserProfile
 const SettingsStack2 = createStackNavigator();
 
-function SettingsStackScreen2() {
+function SettingsStackScreen2( {onLogout} ) {
   return (
     <SettingsStack2.Navigator>
-      <SettingsStack2.Screen name="Settings" component={SettingsScreen2} />
-      <SettingsStack2.Screen name="UserProfile" component={UserProfileScreen} />
+      <SettingsStack2.Screen name="Settings" /*component={SettingsScreen2}*/ children={()=><SettingsScreen2 onLogout={onLogout}/> }/>
+      <SettingsStack2.Screen name="UserProfile" component={UserProfileScreen}/>
       {/* <SettingsStack.Screen name="Login" component={LoginScreen} />
       <SettingsStack.Screen name="SignUp" component={SignUpScreen} /> */}
     </SettingsStack2.Navigator>

@@ -57,14 +57,21 @@ let users = [];
 // Hardcoded username and password for testing
 const testUsername = 'testUser';
 const testPasswordHash = bcrypt.hashSync('testPassword', 10);
-users.push({testUsername, testPasswordHash});
+users.push({username: testUsername, password: testPasswordHash});
+
+console.log(users);
 
 // User login
 app.post('/login', function(req, res) {
   const { username, password } = req.body;
 
+  console.log(username);
+  console.log(password);
+
   // Check if the username exists in the users array
   const foundUser = users.find(user => user.username === username);
+
+  console.log(foundUser);
 
   if (!foundUser) {
     // Username not found
