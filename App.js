@@ -110,7 +110,7 @@ function FormScreen() {
       setFormData(prevFormData => [...prevFormData, values]);
       // console.log('FormScreen - [...formData, values]', [...formData, values]);
 
-      fetch('http://192.168.0.14:5000/forms', {
+      fetch('http://192.168.235.228:5000/forms', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -392,10 +392,58 @@ function SettingsScreen2( {onLogout} ) {
 }
 
 function UserProfileScreen() {
+  
+  const [companyName, setCompanyName] = useState('');
+  const [companyNumber, setCompanyNumber] = useState('');
+  const [companyEmail, setCompanyEmail] = useState('');
+  const [companyBiography, setCompanyBiography] = useState('');
+
+  const [isEditable, setIsEditable] = useState(false);
+
   return (
     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
       <Text>User Profile Screen</Text>
+
+      <Text>Company name:</Text>
+      <TextInput
+        style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+        onChangeText={text => setCompanyName(text)}
+        value={companyName}
+        editable={isEditable}
+        multiline
+      />
+
+      <Text>Company Email:</Text>
+      <TextInput
+        style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+        onChangeText={text => setCompanyNumber(text)}
+        value={companyNumber}
+        editable={isEditable}
+        multiline
+      />
+
+      <Text>Company Number:</Text>
+      <TextInput
+        style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+        onChangeText={text => setCompanyEmail(text)}
+        value={companyEmail}
+        editable={isEditable}
+        multiline
+      />
+
+      <Text>Company Biography:</Text>
+      <TextInput
+        style={{ height: 200, borderColor: 'gray', borderWidth: 1 }}
+        onChangeText={text => setCompanyBiography(text)}
+        value={companyBiography}
+        editable={isEditable}
+        multiline
+      />
+
+      <Button title="Edit Profile" onPress={() => setIsEditable(!isEditable)} />
+
     </View>
+
   )
 }
 
@@ -450,7 +498,7 @@ function SignUpScreen() {
       return;
     }
 
-    fetch('http://192.168.0.14:5000/register', {
+    fetch('http://192.168.235.228:5000/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -549,7 +597,7 @@ function LoginScreen({ onLogin }) {
 
   const handleLogin = () => {
     // Call your login API here
-    fetch('http://192.168.0.14:5000/login', {
+    fetch('http://192.168.235.228:5000/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
