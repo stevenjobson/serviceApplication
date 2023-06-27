@@ -401,12 +401,12 @@ function UserProfileScreen() {
   const [isEditable, setIsEditable] = useState(false);
 
   return (
-    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-      <Text>User Profile Screen</Text>
+    <View style={{flex: 1, justifyContent: 'flex-start', alignItems: 'center'}}>
+      {/* <Text style={{marginBottom: 20}}>User Profile Screen</Text> */}
 
-      <Text>Company name:</Text>
+      <Text style={{}}>Company name:</Text>
       <TextInput
-        style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+        style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20, }}
         onChangeText={text => setCompanyName(text)}
         value={companyName}
         editable={isEditable}
@@ -415,7 +415,7 @@ function UserProfileScreen() {
 
       <Text>Company Email:</Text>
       <TextInput
-        style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+        style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
         onChangeText={text => setCompanyNumber(text)}
         value={companyNumber}
         editable={isEditable}
@@ -424,7 +424,7 @@ function UserProfileScreen() {
 
       <Text>Company Number:</Text>
       <TextInput
-        style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
+        style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
         onChangeText={text => setCompanyEmail(text)}
         value={companyEmail}
         editable={isEditable}
@@ -433,14 +433,14 @@ function UserProfileScreen() {
 
       <Text>Company Biography:</Text>
       <TextInput
-        style={{ height: 200, borderColor: 'gray', borderWidth: 1 }}
+        style={{ height: 200, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
         onChangeText={text => setCompanyBiography(text)}
         value={companyBiography}
         editable={isEditable}
         multiline
       />
 
-      <Button title="Edit Profile" onPress={() => setIsEditable(!isEditable)} />
+      <Button title={isEditable ? "Save Profile" : "Edit Profile"} onPress={() => setIsEditable(!isEditable)} />
 
     </View>
 
