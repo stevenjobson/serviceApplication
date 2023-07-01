@@ -397,16 +397,67 @@ function UserProfileScreen() {
   const [companyNumber, setCompanyNumber] = useState('');
   const [companyEmail, setCompanyEmail] = useState('');
   const [companyBiography, setCompanyBiography] = useState('');
-
   const [isEditable, setIsEditable] = useState(false);
+
+  const profileData =  {
+    companyName, 
+    companyNumber, 
+    companyEmail, 
+    companyBiography
+  };
+
+  // Function to load the user's profile data from AsyncStorage
+  const loadProfileData = async () => {
+    try {
+      // const loadedCompanyName = await AsyncStorage.getItem('companyName');
+      // const loadedCompanyNumber = await AsyncStorage.getItem('companyNumber');
+      // const loadedCompanyEmail = await AsyncStorage.getItem('companyEmail');
+      // const loadedCompanyBiography = await AsyncStorage.getItem('companyBiography');
+
+      // if (loadedCompanyName !== null) setCompanyName(loadedCompanyName);
+      // if (loadedCompanyNumber !== null) setCompanyNumber(loadedCompanyNumber);
+      // if (loadedCompanyEmail !== null) setCompanyEmail(loadedCompanyEmail);
+      // if (loadedCompanyBiography !== null) setCompanyBiography(loadedCompanyBiography);
+
+      const jsonValue = await AsyncStorage.getItem('@profile_Storage_Key');
+      if (jsonValue !== null) {
+        // value previously stored
+        const data = JSON.parse(jsonValue);
+        setCompanyName(data.companyName);
+        setCompanyNumber(data.companyNumber);
+        setCompanyEmail(data.companyEmail);
+        setCompanyBiography(data.companyBiography);
+      }
+      
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Function to save the user's profile data to AsyncStorage
+  // const saveProfileData = async () => {
+  //   try {
+  //     await AsyncStorage.setItem('companyName', companyName);
+  //     await AsyncStorage.setItem('companyNumber', companyNumber);
+  //     await AsyncStorage.setItem('companyEmail', companyEmail);
+  //     await AsyncStorage.setItem('companyBiography', companyBiography);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
+
+  // Load the user's profile data from AsyncStorage when the component mounts
+  useEffect(async () => {
+    await loadProfileData();
+  }, []);
 
   return (
     <View style={{flex: 1, justifyContent: 'flex-start', alignItems: 'center'}}>
       {/* <Text style={{marginBottom: 20}}>User Profile Screen</Text> */}
 
-      <Text style={{}}>Company name:</Text>
+      <Text style={{alignItems: "flex-start" , marginTop: 20}}>Company name:</Text>
       <TextInput
-        style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20, }}
+        style={{ padding: 10, textAlignVertical: 'top', height: 40, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20, }}
         onChangeText={text => setCompanyName(text)}
         value={companyName}
         editable={isEditable}
@@ -415,7 +466,7 @@ function UserProfileScreen() {
 
       <Text>Company Email:</Text>
       <TextInput
-        style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
+        style={{padding: 10, textAlignVertical: 'top', height: 40, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
         onChangeText={text => setCompanyNumber(text)}
         value={companyNumber}
         editable={isEditable}
@@ -424,7 +475,7 @@ function UserProfileScreen() {
 
       <Text>Company Number:</Text>
       <TextInput
-        style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
+        style={{ padding: 10, textAlignVertical: 'top', height: 40, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
         onChangeText={text => setCompanyEmail(text)}
         value={companyEmail}
         editable={isEditable}
@@ -433,19 +484,56 @@ function UserProfileScreen() {
 
       <Text>Company Biography:</Text>
       <TextInput
-        style={{ height: 200, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
+        style={{padding: 10, textAlignVertical: 'top', height: 200, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
         onChangeText={text => setCompanyBiography(text)}
         value={companyBiography}
         editable={isEditable}
         multiline
       />
 
-      <Button title={isEditable ? "Save Profile" : "Edit Profile"} onPress={() => setIsEditable(!isEditable)} />
+      
+
+      <Button title={isEditable ? "Save Profile" : "Edit Profile"} onPress= {async () => { setIsEditable(!isEditable); if (!isEditable) { await storeProfileData(profileData); }} }/>
 
     </View>
-
   )
 }
+
+//store profile data function.
+//original storeData function used as reference
+//could be shorter -assuming that setItem overwrites previous Item in memory
+//in which case I wouldn't need removeItem.
+const storeProfileData = async (value) => {
+  try {  
+    console.log("storeProfileData - values: ", value);
+
+    // const jsonProfile = await AsyncStorage.getItem('@profile_Storage_key');
+    // jsonProfile.removeItem();
+    
+    // await AsyncStorage.removeItem('@profile_Storage_Key');
+    await AsyncStorage.setItem('@profile_Storage_Key', JSON.stringify(value));
+
+    const updatedJsonValue = await AsyncStorage.getItem('@profile_Storage_Key');
+    console.log("storeProfileData - Updated JSON (testing purposes): ", updatedJsonValue);
+
+  } catch (e) {
+    console.log("error in the storeData function: " + e);
+  }
+}
+
+async function getProfileData() {
+  try {
+    const jsonProfileValue = await AsyncStorage.getItem('@profile_Storage_Key');
+    console.log("getProfileData - jsonValue: ", jsonProfileValue);
+
+    return jsonValue != null ? JSON.parse(jsonProfileValue) : [];
+  }
+  catch(e) {
+      console.log("error: " + e);
+      return [];
+  }
+}
+
 
 //sign up screen
 function SignUpScreen() {
@@ -717,7 +805,7 @@ function SettingsStackScreen1( {onLogin} ) {
   );
 }
 
-// Create a new stack for Settings and UserProfile
+// Create a new stack for Settings and                
 const SettingsStack2 = createStackNavigator();
 
 function SettingsStackScreen2( {onLogout} ) {
