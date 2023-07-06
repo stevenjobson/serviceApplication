@@ -24,7 +24,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(cors({
-  origin: 'http://192.168.235.228192.168.0.14:5000', // replace with the origin of your client
+  origin: 'http://192.168.0.14:5000', // replace with the origin of your client
   methods: ['GET', 'POST'], // the methods you want to allow
   credentials: true // allow session cookies from the client to be sent in CORS requests
 }));

@@ -20,6 +20,8 @@ import * as MediaLibrary from 'expo-media-library';
 
 export const FormDataContext = React.createContext();
 
+// let globalUserName = '';
+
 // import HomeScreen from './HomeScreen'; // Adjust the path as necessary
 
 // Define your HomeScreen component
@@ -110,7 +112,7 @@ function FormScreen() {
       setFormData(prevFormData => [...prevFormData, values]);
       // console.log('FormScreen - [...formData, values]', [...formData, values]);
 
-      fetch('http://192.168.235.228:5000/forms', {
+      fetch('http://192.168.0.14:5000/forms', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -391,7 +393,7 @@ function SettingsScreen2( {onLogout} ) {
   );
 }
 
-function UserProfileScreen() {
+function UserProfileScreen({username}) {
   
   const [companyName, setCompanyName] = useState('');
   const [companyNumber, setCompanyNumber] = useState('');
@@ -406,20 +408,14 @@ function UserProfileScreen() {
     companyBiography
   };
 
+
+  // console.log("the username is: ", username);
+
   // Function to load the user's profile data from AsyncStorage
-  const loadProfileData = async () => {
+  const loadProfileData = async (username) => {
     try {
-      // const loadedCompanyName = await AsyncStorage.getItem('companyName');
-      // const loadedCompanyNumber = await AsyncStorage.getItem('companyNumber');
-      // const loadedCompanyEmail = await AsyncStorage.getItem('companyEmail');
-      // const loadedCompanyBiography = await AsyncStorage.getItem('companyBiography');
-
-      // if (loadedCompanyName !== null) setCompanyName(loadedCompanyName);
-      // if (loadedCompanyNumber !== null) setCompanyNumber(loadedCompanyNumber);
-      // if (loadedCompanyEmail !== null) setCompanyEmail(loadedCompanyEmail);
-      // if (loadedCompanyBiography !== null) setCompanyBiography(loadedCompanyBiography);
-
-      const jsonValue = await AsyncStorage.getItem('@profile_Storage_Key');
+      
+      const jsonValue = await AsyncStorage.getItem('@profile_Storage_Key_' + username );      
       if (jsonValue !== null) {
         // value previously stored
         const data = JSON.parse(jsonValue);
@@ -433,22 +429,9 @@ function UserProfileScreen() {
       console.error(error);
     }
   };
-
-  // Function to save the user's profile data to AsyncStorage
-  // const saveProfileData = async () => {
-  //   try {
-  //     await AsyncStorage.setItem('companyName', companyName);
-  //     await AsyncStorage.setItem('companyNumber', companyNumber);
-  //     await AsyncStorage.setItem('companyEmail', companyEmail);
-  //     await AsyncStorage.setItem('companyBiography', companyBiography);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-
-  // Load the user's profile data from AsyncStorage when the component mounts
-  useEffect(async () => {
-    await loadProfileData();
+  
+  useEffect(() => {
+    loadProfileData(username);
   }, []);
 
   return (
@@ -467,8 +450,8 @@ function UserProfileScreen() {
       <Text>Company Email:</Text>
       <TextInput
         style={{padding: 10, textAlignVertical: 'top', height: 40, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
-        onChangeText={text => setCompanyNumber(text)}
-        value={companyNumber}
+        onChangeText={text => setCompanyEmail(text)}
+        value={companyEmail}
         editable={isEditable}
         multiline
       />
@@ -476,8 +459,8 @@ function UserProfileScreen() {
       <Text>Company Number:</Text>
       <TextInput
         style={{ padding: 10, textAlignVertical: 'top', height: 40, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
-        onChangeText={text => setCompanyEmail(text)}
-        value={companyEmail}
+        onChangeText={text => setCompanyNumber(text)}
+        value={companyNumber}
         editable={isEditable}
         multiline
       />
@@ -489,11 +472,23 @@ function UserProfileScreen() {
         value={companyBiography}
         editable={isEditable}
         multiline
+      /> 
+
+      <Button title={isEditable ? "Save Profile" : "Edit Profile"} 
+      onPress= {async () => { 
+        // console.log("Button pressed. Current state:");
+        // console.log("companyName: ", companyName);
+        // console.log("companyNumber: ", companyNumber);
+        // console.log("companyEmail: ", companyEmail);
+        // console.log("companyBiography: ", companyBiography);
+        // console.log("profileData: ", profileData);
+
+        setIsEditable(!isEditable); 
+        if (!isEditable) { 
+          await storeProfileData(profileData, username); 
+          }
+        }}
       />
-
-      
-
-      <Button title={isEditable ? "Save Profile" : "Edit Profile"} onPress= {async () => { setIsEditable(!isEditable); if (!isEditable) { await storeProfileData(profileData); }} }/>
 
     </View>
   )
@@ -503,7 +498,7 @@ function UserProfileScreen() {
 //original storeData function used as reference
 //could be shorter -assuming that setItem overwrites previous Item in memory
 //in which case I wouldn't need removeItem.
-const storeProfileData = async (value) => {
+const storeProfileData = async (value, username) => {
   try {  
     console.log("storeProfileData - values: ", value);
 
@@ -511,9 +506,9 @@ const storeProfileData = async (value) => {
     // jsonProfile.removeItem();
     
     // await AsyncStorage.removeItem('@profile_Storage_Key');
-    await AsyncStorage.setItem('@profile_Storage_Key', JSON.stringify(value));
+    await AsyncStorage.setItem('@profile_Storage_Key_' + username, JSON.stringify(value));
 
-    const updatedJsonValue = await AsyncStorage.getItem('@profile_Storage_Key');
+    const updatedJsonValue = await AsyncStorage.getItem('@profile_Storage_Key_'+username);
     console.log("storeProfileData - Updated JSON (testing purposes): ", updatedJsonValue);
 
   } catch (e) {
@@ -521,18 +516,18 @@ const storeProfileData = async (value) => {
   }
 }
 
-async function getProfileData() {
-  try {
-    const jsonProfileValue = await AsyncStorage.getItem('@profile_Storage_Key');
-    console.log("getProfileData - jsonValue: ", jsonProfileValue);
+// async function getProfileData() {
+//   try {
+//     const jsonProfileValue = await AsyncStorage.getItem('@profile_Storage_Key');
+//     console.log("getProfileData - jsonValue: ", jsonProfileValue);
 
-    return jsonValue != null ? JSON.parse(jsonProfileValue) : [];
-  }
-  catch(e) {
-      console.log("error: " + e);
-      return [];
-  }
-}
+//     return jsonValue != null ? JSON.parse(jsonProfileValue) : [];
+//   }
+//   catch(e) {
+//       console.log("error: " + e);
+//       return [];
+//   }
+// }
 
 
 //sign up screen
@@ -586,7 +581,7 @@ function SignUpScreen() {
       return;
     }
 
-    fetch('http://192.168.235.228:5000/register', {
+    fetch('http://192.168.0.14:5000/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -672,7 +667,7 @@ function SignUpScreen() {
 }
 
 //login screen
-function LoginScreen({ onLogin }) {
+function LoginScreen({ onLogin, userName }) {
   // return (
   //   <View style={{flex:1, justifyContent: 'flex-start', alignItems: 'center', backgroundColor: '#25292e'}}>
   //     <TouchableOpacity style={styles.settingsButton} >
@@ -685,7 +680,7 @@ function LoginScreen({ onLogin }) {
 
   const handleLogin = () => {
     // Call your login API here
-    fetch('http://192.168.235.228:5000/login', {
+    fetch('http://192.168.0.14:5000/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -701,6 +696,7 @@ function LoginScreen({ onLogin }) {
       console.log(data);
       if (data.message === 'User logged in successfully.') {
       onLogin();
+      userName(username);
     } else {
       // Handle login failure
       alert('Invalid username or password');
@@ -710,8 +706,11 @@ function LoginScreen({ onLogin }) {
       console.error('Error:', error);
     });
   }
-
+  
+  // globalUserName = username;
+  
   return (
+    
     <View style={styles.container3}>
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Username</Text>
@@ -746,11 +745,11 @@ function LoginScreen({ onLogin }) {
 
 const PreLogTab = createBottomTabNavigator();
 
-function PreLoggedInTabs( {onLogin} ) {
+function PreLoggedInTabs( {onLogin, userName} ) {
   return (
     <PreLogTab.Navigator>
       <PreLogTab.Screen name="PrelogHome" component={HomeStack1} options={{ headerShown: false}} />
-      <PreLogTab.Screen name="PrelogSettings'" options={{ headerShown: false}} children={()=><SettingsStackScreen1 onLogin={onLogin} />}/>
+      <PreLogTab.Screen name="PrelogSettings'" options={{ headerShown: false}} children={()=><SettingsStackScreen1 onLogin={onLogin} userName={userName} />}/>
     </PreLogTab.Navigator>
   );
 }
@@ -758,12 +757,12 @@ function PreLoggedInTabs( {onLogin} ) {
 //this handles the post logged in view of my app
 const PostLogTab = createBottomTabNavigator();
 
-function PostLoggedInTabs( {onLogout} ) {
+function PostLoggedInTabs( {onLogout, username} ) {
     return (
         <PostLogTab.Navigator >
           <PostLogTab.Screen  name="Home" component={HomeStack2} options={{ headerShown: false}}/>
           <PostLogTab.Screen name="Chat" component={ChatScreen} />
-          <PostLogTab.Screen name="Settings'" /*component={SettingsStackScreen2}*/ options={{ headerShown: false}} children={()=><SettingsStackScreen2 onLogout={onLogout} />}/>
+          <PostLogTab.Screen name="Settings'" /*component={SettingsStackScreen2}*/ options={{ headerShown: false}} children={()=><SettingsStackScreen2 onLogout={onLogout} username={username} />}/>
         </PostLogTab.Navigator>
     );
 }
@@ -794,12 +793,12 @@ function HomeStack2() {
 
 const SettingsStack1 = createStackNavigator();
 
-function SettingsStackScreen1( {onLogin} ) {
+function SettingsStackScreen1( {onLogin, userName} ) {
   return (
     <SettingsStack1.Navigator>
       <SettingsStack1.Screen name="Settings" component={SettingsScreen1} />
       {/* <SettingsStack2.Screen name="UserProfile" component={UserProfileScreen} /> */}
-      <SettingsStack1.Screen name="Login" /*component={LoginScreen}*/ children={()=><LoginScreen onLogin={onLogin}/> } />
+      <SettingsStack1.Screen name="Login" /*component={LoginScreen}*/ children={()=><LoginScreen onLogin={onLogin} userName={userName}/> } />
       <SettingsStack1.Screen name="SignUp" component={SignUpScreen} />
     </SettingsStack1.Navigator>
   );
@@ -808,11 +807,12 @@ function SettingsStackScreen1( {onLogin} ) {
 // Create a new stack for Settings and                
 const SettingsStack2 = createStackNavigator();
 
-function SettingsStackScreen2( {onLogout} ) {
+function SettingsStackScreen2( {onLogout, username} ) {
   return (
     <SettingsStack2.Navigator>
       <SettingsStack2.Screen name="Settings" /*component={SettingsScreen2}*/ children={()=><SettingsScreen2 onLogout={onLogout}/> }/>
-      <SettingsStack2.Screen name="UserProfile" component={UserProfileScreen}/>
+      <SettingsStack2.Screen name="UserProfile" children={()=><UserProfileScreen username={username}/>}/>
+      
       {/* <SettingsStack.Screen name="Login" component={LoginScreen} />
       <SettingsStack.Screen name="SignUp" component={SignUpScreen} /> */}
     </SettingsStack2.Navigator>
@@ -823,6 +823,7 @@ export default function App() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [formData, setFormData] = useState([]); 
+  const [username, setUsername] = useState(null); //two state variables called username in different functions. errors arise?
 
   useEffect(() => {
     clearSpecificKey(); // or clearSpecificKey();
@@ -830,7 +831,14 @@ export default function App() {
 
   const handleLogin2 = () => {
     setIsLoggedIn(true);
+    // setUsername(username);
   };
+
+  const userName = (username) => {
+    setUsername(username);
+  }
+
+  console.log("ze username: " +username);
 
   const handleLogout = () => {
     setIsLoggedIn(false);
@@ -847,9 +855,9 @@ export default function App() {
       <FormDataContext.Provider value={{ formData, setFormData }}>
         <NavigationContainer>
           {isLoggedIn ? (
-            <PostLoggedInTabs onLogout={handleLogout} />
+            <PostLoggedInTabs onLogout={handleLogout} username={username}/> //I'm assuming that I've got a value for username at this point
           ) : (
-            <PreLoggedInTabs onLogin={handleLogin2}/>
+            <PreLoggedInTabs onLogin={handleLogin2} userName={userName}/>//change this to globalUserName for consistency.
           )}
         </NavigationContainer>
       </FormDataContext.Provider>
