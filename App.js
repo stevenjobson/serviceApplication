@@ -90,10 +90,7 @@ function FormScreen() {
   const formik = useFormik({
     initialValues: {
       id: id,
-      companyName: '',
-      companyNumber: '', 
-      companyEmail: '',
-      companyWebsite: '',
+      PostTitle: '',
       DescriptionOfService: '',
       imageUri: '',
     },
@@ -140,7 +137,7 @@ function FormScreen() {
       behavior={Platform.OS === "android" ? "height" : "padding"}
       style={{ justifyContent: 'center', padding: 20, backgroundColor: '#25292e', flex: 1}}>
       <ScrollView contentContainerStyle={{justifyContent: 'center', padding: 20}}>
-        <Text style={{color: 'white'}}>Company Name</Text>
+        {/* <Text style={{color: 'white'}}>Company Name</Text>
         <TextInput
           label="Company Name"
           name="companyName"
@@ -148,33 +145,42 @@ function FormScreen() {
           onChangeText={text => formik.handleChange('companyName')(text)}
           //onChangeText={formik.handleChange('companyName')}
           style={{height: 40, borderColor: 'gray', borderWidth: 1, color: 'black', backgroundColor: '#fff', paddingLeft: 10, marginTop: 1, marginLeft: 20, marginRight: 20}}
-        />
+        /> */}
 
-        <Text style={{color: 'white', marginTop: 20}}>Company Number</Text>
+        {/* <Text style={{color: 'white', marginTop: 20}}>Company Number</Text>
         <TextInput
           label="Company Number"
           name="companyNumber"
           value={formik.values.companyNumber}
           onChangeText={text => formik.handleChange('companyNumber')(text)}
           style={{height: 40, borderColor: 'gray', borderWidth: 1, color: 'black', backgroundColor: '#fff', paddingLeft: 10, marginTop: 1, marginLeft: 20, marginRight: 20}}
-        />
+        /> */}
 
-        <Text style={{color: 'white', marginTop: 20}}>Company Email</Text>
+        {/* <Text style={{color: 'white', marginTop: 20}}>Company Email</Text>
         <TextInput
           label="Company Email"
           name="companyEmail"
           value={formik.values.companyEmail}
           onChangeText={text => formik.handleChange('companyEmail')(text)}
           style={{height: 40, borderColor: 'gray', borderWidth: 1, color: 'black', backgroundColor: '#fff', paddingLeft: 10, marginTop: 1, marginLeft: 20, marginRight: 20}}
-        />
+        /> */}
 
-        <Text style={{color: 'white', marginTop: 20}}>Company Website</Text>
+        {/* <Text style={{color: 'white', marginTop: 20}}>Company Website</Text>
         <TextInput
           label="Company Website"
           name="companyWebsite"
           value={formik.values.companyWebsite}
           onChangeText={text => formik.handleChange('companyWebsite')(text)} 
           style={{height: 40, borderColor: 'gray', borderWidth: 1, color: 'black', backgroundColor: '#fff', paddingLeft: 10, marginTop: 1, marginLeft: 20, marginRight: 20}}
+        /> */}
+
+        <Text style={{color: 'white', marginTop: 20}}>Post Title</Text>
+        <TextInput
+          label="Post Title"
+          name="PostTitle"
+          value={formik.values.PostTitle}
+          onChangeText={text => formik.handleChange('PostTitle')(text)}
+          style={{marginBottom: 20, height: 40, borderColor: 'gray', borderWidth: 1, color: 'black', backgroundColor: '#fff', paddingLeft: 10, marginTop: 1, marginLeft: 20, marginRight: 20}}
         />
 
         <Text style={{color: 'white', marginTop: 20}}>Company Description</Text>
@@ -317,10 +323,13 @@ function DisplayScreen() {
         {formData && formData.map((form) => (
           <View key={form.id} style={styles.displayContainer}>
             <View style={{ flex: 1}}>
-              <Text style={{color: 'black'}} >Company Name: {form.companyName}</Text>
+              {/* you can still display all the below information, you just have to get it from
+              the database. */}
+              {/* <Text style={{color: 'black'}} >Company Name: {form.companyName}</Text>
               <Text style={{color: 'black'}} >Company Number: {form.companyNumber}</Text>
               <Text style={{color: 'black'}} >Company Email: {form.companyEmail}</Text>
-              <Text style={{color: 'black'}} >Company Website: {form.companyWebsite}</Text>
+              <Text style={{color: 'black'}} >Company Website: {form.companyWebsite}</Text> */}
+              <Text style={{color: 'black'}} >Post Title: {form.PostTitle}</Text>              
               <Text style={{color: 'black'}} >Desciption of Service: {form.DescriptionOfService}</Text>
             </View>
             {form.imageUri && (
@@ -400,12 +409,14 @@ function UserProfileScreen({username}) {
   const [companyEmail, setCompanyEmail] = useState('');
   const [companyBiography, setCompanyBiography] = useState('');
   const [isEditable, setIsEditable] = useState(false);
+  const [companyWebsite, setCompanyWebsite] = useState('');
 
-  const profileData =  {
+  const profileData = {
     companyName, 
     companyNumber, 
     companyEmail, 
-    companyBiography
+    companyBiography,
+    companyWebsite
   };
 
 
@@ -423,6 +434,7 @@ function UserProfileScreen({username}) {
         setCompanyNumber(data.companyNumber);
         setCompanyEmail(data.companyEmail);
         setCompanyBiography(data.companyBiography);
+        setCompanyWebsite(data.companyWebsite);
       }
       
     } catch (error) {
@@ -435,7 +447,8 @@ function UserProfileScreen({username}) {
   }, []);
 
   return (
-    <View style={{flex: 1, justifyContent: 'flex-start', alignItems: 'center'}}>
+    <ScrollView>
+      <View style={{flex: 1, justifyContent: 'flex-start', alignItems: 'center'}}>
       {/* <Text style={{marginBottom: 20}}>User Profile Screen</Text> */}
 
       <Text style={{alignItems: "flex-start" , marginTop: 20}}>Company name:</Text>
@@ -465,6 +478,15 @@ function UserProfileScreen({username}) {
         multiline
       />
 
+      <Text>Company Website:</Text>
+      <TextInput 
+        style={{padding: 10, textAlignVertical: 'top', height: 40, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20}}
+        onChangeText={text => setCompanyWebsite(text)}
+        value={companyWebsite}
+        editable={isEditable}
+        multiline
+      />
+        
       <Text>Company Biography:</Text>
       <TextInput
         style={{padding: 10, textAlignVertical: 'top', height: 200, width: 300, borderColor: 'gray', borderWidth: 1, marginBottom: 20 }}
@@ -489,8 +511,9 @@ function UserProfileScreen({username}) {
           }
         }}
       />
-
-    </View>
+      </View>
+    </ScrollView>
+    
   )
 }
 
@@ -515,6 +538,9 @@ const storeProfileData = async (value, username) => {
     console.log("error in the storeData function: " + e);
   }
 }
+
+//johntheking98*
+//port: 5432
 
 // async function getProfileData() {
 //   try {
